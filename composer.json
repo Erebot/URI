@@ -21,8 +21,8 @@
     },
     "require": {
         "php": ">=5.3.0",
-        "ext-ctype": "*",
-        "ext-pcre": "*"
+        "ext-pcre": "*",
+        "ext-spl": "*"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "*",

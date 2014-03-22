@@ -723,7 +723,7 @@ class Main implements \Erebot\URI\URIInterface
 
             // Cleanup "port" component.
             if (isset($result['port'])) {
-                if (!ctype_digit($result['port'])) {
+                if (strspn($result['port'], '0123456789') != strlen($result['port'])) {
                     unset($result['port']);
                     unset($result[PHP_URL_PORT]);
                 } else {
@@ -757,7 +757,7 @@ class Main implements \Erebot\URI\URIInterface
                 return $this->host;
 
             case PHP_URL_PORT:
-                return  ($this->port === null || !ctype_digit($this->port))
+                return  ($this->port === null || strspn($this->port, '0123456789') != strlen($this->port))
                         ? null
                         : (int) $this->port;
 
