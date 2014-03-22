@@ -1,0 +1,46 @@
+{
+    "prefer-stable": true,
+    "name": "erebot/uri",
+    "description": "URI parsing and generation",
+    "keywords": ["URI"],
+    "homepage": "https://github.com/Erebot/URI",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "François Poirotte",
+            "email": "clicky@erebot.net",
+            "role": "lead"
+        }
+    ],
+    "support": {
+        "email": "erebot@erebot.net",
+        "issues": "https://github.com/Erebot/URI/issues",
+        "wiki": "http://erebot.github.io/Erebot/",
+        "irc": "irc://irc.iiens.net/Erebot",
+        "source": "https://github.com/Erebot/URI"
+    },
+    "require": {
+        "php": ">=5.3.0",
+        "ext-ctype": "*",
+        "ext-pcre": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "suggest": {
+        "ext-openssl": "*",
+        "ext-pcntl": "*",
+        "ext-posix": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Erebot\\URI\\": "src/"
+        }
+    },
+    "bin": ["bin/Erebot"],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
