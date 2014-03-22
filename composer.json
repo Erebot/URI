@@ -28,11 +28,6 @@
         "squizlabs/php_codesniffer": "*",
         "phpunit/phpunit": "*"
     },
-    "suggest": {
-        "ext-openssl": "*",
-        "ext-pcntl": "*",
-        "ext-posix": "*"
-    },
     "autoload": {
         "psr-4": {
             "Erebot\\URI\\": "src/"
