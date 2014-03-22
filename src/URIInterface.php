@@ -32,26 +32,26 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the raw contents of the components
-     *      should be used (TRUE) or a normalized alternative (FALSE).
+     *      should be used (\b true) or a normalized alternative (\b false).
      *      The default is to apply normalization.
      *
      * \param bool $credentials
      *      (optional) Whether the content of the "user information"
-     *      component should be part of the returned string (TRUE)
-     *      or not (FALSE). The default is for such credentials to
+     *      component should be part of the returned string (\b true)
+     *      or not (\b false). The default is for such credentials to
      *      appear in the result.
      *
      * \retval string
      *      The current URI as a string, eventually normalized.
      */
-    public function toURI($raw = FALSE, $credentials = TRUE);
+    public function toURI($raw = false, $credentials = true);
 
     /**
      * Returns the current URI as a string,
      * in its normalized form.
      *
      * \note
-     *      This method is a shortcut for ::Erebot::URI::toURI(FALSE).
+     *      This method is a shortcut for \\Erebot\\URI\\toURI(\b false).
      */
     public function __toString();
 
@@ -60,14 +60,14 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval string
      *      The current URI's scheme as a string,
      *      eventually normalized.
      */
-    public function getScheme($raw = FALSE);
+    public function getScheme($raw = false);
 
     /**
      * Sets the current URI's scheme.
@@ -85,21 +85,21 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
      *      The current URI's user information,
-     *      eventually normalized or NULL.
+     *      eventually normalized or \b null.
      */
-    public function getUserInfo($raw = FALSE);
+    public function getUserInfo($raw = false);
 
     /**
      * Sets the current URI's user information.
      *
      * \param mixed $userinfo
      *      New user information for this URI
-     *      (either a string or NULL).
+     *      (either a string or \b null).
      *
      * \throw ::InvalidArgumentException
      *      The given user information is not valid.
@@ -111,20 +111,20 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
      *      The current URI's host as a string,
-     *      eventually normalized or NULL.
+     *      eventually normalized or \b null.
      */
-    public function getHost($raw = FALSE);
+    public function getHost($raw = false);
 
     /**
      * Sets the current URI's host.
      *
      * \param string $host
-     *      New host for this URI (either a string or NULL).
+     *      New host for this URI (either a string or \b null).
      *
      * \throw ::InvalidArgumentException
      *      The given $host is not valid.
@@ -136,24 +136,24 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
      *      When normalization is in effect, the port for
      *      the current URI will be returned as an integer,
-     *      or NULL.
+     *      or \b null.
      *      When normalization has been disabled, the port
-     *      will be returned as a string or NULL.
+     *      will be returned as a string or \b null.
      */
-    public function getPort($raw = FALSE);
+    public function getPort($raw = false);
 
     /**
      * Sets the current URI's port.
      *
      * \param mixed $port
      *      New port for this URI (either a numeric string,
-     *      an integer or NULL).
+     *      an integer or \b null).
      *
      * \throw ::InvalidArgumentException
      *      The given $port is not valid.
@@ -165,14 +165,14 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval string
      *      The current URI's path as a string,
      *      eventually normalized.
      */
-    public function getPath($raw = FALSE);
+    public function getPath($raw = false);
 
     /**
      * Sets the current URI's path.
@@ -194,20 +194,20 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
      *      The current URI's query as a string,
-     *      eventually normalized or NULL.
+     *      eventually normalized or \b null.
      */
-    public function getQuery($raw = FALSE);
+    public function getQuery($raw = false);
 
     /**
      * Sets the current URI's query.
      *
      * \param mixed $query
-     *      New query for this URI (either a string or NULL).
+     *      New query for this URI (either a string or \b null).
      *
      * \throw ::InvalidArgumentException
      *      The given $query is not valid.
@@ -219,20 +219,20 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
+     *      before it's returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
      *      The current URI's fragment as a string,
-     *      eventually normalized or NULL.
+     *      eventually normalized or \b null.
      */
-    public function getFragment($raw = FALSE);
+    public function getFragment($raw = false);
 
     /**
      * Sets the current URI's fragment.
      *
      * \param mixed $fragment
-     *      New fragment for this URI (either a string or NULL).
+     *      New fragment for this URI (either a string or \b null).
      *
      * \throw ::InvalidArgumentException
      *      The given $fragment is not valid.
@@ -249,7 +249,7 @@ interface URIInterface
      *      for more information.
      *
      * \retval mixed
-     *      Either an array, a string, an integer or NULL,
+     *      Either an array, a string, an integer or \b null,
      *      depending on $component and the actual contents
      *      of this URI.
      *      Read the documentation about parse_url()
@@ -288,7 +288,7 @@ interface URIInterface
      *
      * \param bool $strict
      *      (optional) Whether strict parsing rules apply or not.
-     *      Defaults to TRUE. When set to FALSE, '/' is treated
+     *      Defaults to \b true. When set to \b false, '/' is treated
      *      as a path separator even on systems where it is not
      *      the native separator (eg. Windows).
      *
@@ -299,6 +299,5 @@ interface URIInterface
      * \throw ::InvalidArgumentException
      *      The given $abspath was invalid.
      */
-    public static function fromAbsPath($abspath, $strict = TRUE);
+    public static function fromAbsPath($abspath, $strict = true);
 }
-

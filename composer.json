@@ -25,6 +25,7 @@
         "ext-pcre": "*"
     },
     "require-dev": {
+        "squizlabs/php_codesniffer": "*",
         "phpunit/phpunit": "*"
     },
     "suggest": {

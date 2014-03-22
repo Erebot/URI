@@ -40,26 +40,25 @@ namespace Erebot\URI;
  *
  * All components are normalized by default when retrieved using
  * any of the getters except asParsedURL(). You may override this
- * behaviour by passing $raw=TRUE to said getters.
+ * behaviour by passing $raw=true to said getters.
  * Normalization is done using the rules defined in RFC 3986.
  */
-class       Main
-implements  \Erebot\URI\URIInterface
+class Main implements \Erebot\URI\URIInterface
 {
     /// Scheme component (sometimes also erroneously called a "protocol").
-    protected $_scheme;
+    protected $scheme;
     /// User information component (such as a "username:password" pair).
-    protected $_userinfo;
+    protected $userinfo;
     /// Host component ("authority", even though "authority" is more general).
-    protected $_host;
+    protected $host;
     /// Port component.
-    protected $_port;
+    protected $port;
     /// Path component.
-    protected $_path;
+    protected $path;
     /// Query component.
-    protected $_query;
+    protected $query;
     /// Fragment component.
-    protected $_fragment;
+    protected $fragment;
 
     /**
      * Constructs an URI.
@@ -73,15 +72,19 @@ implements  \Erebot\URI\URIInterface
      */
     public function __construct($uri)
     {
-        if (is_string($uri))
-            $uri = $this->_parseURI($uri, FALSE);
-        if (!is_array($uri))
+        if (is_string($uri)) {
+            $uri = $this->parseURI($uri, false);
+        }
+
+        if (!is_array($uri)) {
             throw new \InvalidArgumentException('Invalid URI');
+        }
 
         if (!isset($uri['userinfo']) && isset($uri['user'])) {
             $uri['userinfo'] = $uri['user'];
-            if (isset($uri['pass']))
+            if (isset($uri['pass'])) {
                 $uri['userinfo'] .= ':'.$uri['pass'];
+            }
         }
 
         $components = array(
@@ -97,10 +100,11 @@ implements  \Erebot\URI\URIInterface
         foreach ($components as $component) {
             $tmp    = strtolower($component);
             $setter = 'set'.$component;
-            if (isset($uri[$tmp]))
+            if (isset($uri[$tmp])) {
                 $this->$setter($uri[$tmp]);
-            else
-                $this->$setter(NULL);
+            } else {
+                $this->$setter(null);
+            }
         }
     }
 
@@ -111,8 +115,8 @@ implements  \Erebot\URI\URIInterface
      *      URI to parse.
      *
      * \param bool $relative
-     *      Whether $uri must be considered as an absolute URI (FALSE)
-     *      or a relative reference (TRUE).
+     *      Whether $uri must be considered as an absolute URI (\b false)
+     *      or a relative reference (\b true).
      *
      * \retval array
      *      An associative array containing the different components
@@ -124,15 +128,17 @@ implements  \Erebot\URI\URIInterface
      * \throw ::InvalidArgumentException
      *      The given $uri is not valid.
      */
-    protected function _parseURI($uri, $relative)
+    protected function parseURI($uri, $relative)
     {
         $result = array();
 
         if (!$relative) {
             // Parse scheme.
             $pos = strpos($uri, ':');
-            if (!$pos)  // An URI starting with ":" is also invalid.
+            if (!$pos) {
+                // An URI starting with ":" is also invalid.
                 throw new \InvalidArgumentException('No scheme found');
+            }
 
             $result['scheme'] = substr($uri, 0, $pos);
             $uri = (string) substr($uri, $pos + 1);
@@ -140,14 +146,14 @@ implements  \Erebot\URI\URIInterface
 
         // Parse fragment.
         $pos = strpos($uri, '#');
-        if ($pos !== FALSE) {
+        if ($pos !== false) {
             $result['fragment'] = (string) substr($uri, $pos + 1);
             $uri = (string) substr($uri, 0, $pos);
         }
 
         // Parse query string.
         $pos = strpos($uri, '?');
-        if ($pos !== FALSE) {
+        if ($pos !== false) {
             $result['query'] = (string) substr($uri, $pos + 1);
             $uri = (string) substr($uri, 0, $pos);
         }
@@ -166,14 +172,14 @@ implements  \Erebot\URI\URIInterface
             // Parse path.
             $result['path'] = '';
             $pos = strpos($uri, '/');
-            if ($pos !== FALSE) {
+            if ($pos !== false) {
                 $result['path'] = substr($uri, $pos);
                 $uri = (string) substr($uri, 0, $pos);
             }
 
             // Parse userinfo.
             $pos = strpos($uri, '@');
-            if ($pos !== FALSE) {
+            if ($pos !== false) {
                 $result['userinfo'] = (string) substr($uri, 0, $pos);
                 $uri = (string) substr($uri, $pos + 1);
             }
@@ -209,7 +215,7 @@ implements  \Erebot\URI\URIInterface
      *      This method is just a thin wrapper around
      *      Erebot_URI::normalizePercentReal.
      */
-    protected static function _normalizePercent($data)
+    protected static function normalizePercent($data)
     {
         return preg_replace_callback(
             '/%([[:xdigit:]]{2})/',
@@ -237,29 +243,13 @@ implements  \Erebot\URI\URIInterface
                         '-._~';
 
         $chr = chr(hexdec($hexchr[1]));
-        if (strpos($unreserved, $chr) !== FALSE)
+        if (strpos($unreserved, $chr) !== false) {
             return $chr;
+        }
         return '%' . strtoupper($hexchr[1]);
     }
 
-    /**
-     * Returns the current URI as a string.
-     *
-     * \param bool $raw
-     *      (optional) Whether the raw contents of the components
-     *      should be used (TRUE) or a normalized alternative (FALSE).
-     *      The default is to apply normalization.
-     *
-     * \param bool $credentials
-     *      (optional) Whether the content of the "user information"
-     *      component should be part of the returned string (TRUE)
-     *      or not (FALSE). The default is for such credentials to
-     *      appear in the result.
-     *
-     * \retval string
-     *      The current URI as a string, eventually normalized.
-     */
-    public function toURI($raw = FALSE, $credentials = TRUE)
+    public function toURI($raw = false, $credentials = true)
     {
         // 5.3.  Component Recomposition
         $result = "";
@@ -268,112 +258,70 @@ implements  \Erebot\URI\URIInterface
         // because we only deal with absolute URIs here.
         // The condition is checked anyway to keep the code
         // in line with the algorithm described in RFC 3986.
-        if ($this->_scheme !== NULL)
+        if ($this->scheme !== null) {
             $result .= $this->getScheme($raw).':';
+        }
 
-        if ($this->_host !== NULL) {
+        if ($this->host !== null) {
             $result .= '//';
-            if ($this->_userinfo !== NULL && $credentials)
+            if ($this->userinfo !== null && $credentials) {
                 $result .= $this->getUserInfo($raw)."@";
+            }
 
             $result    .= $this->getHost($raw);
             $port       = $this->getPort($raw);
-            if ($port !== NULL)
+            if ($port !== null) {
                 $result .= ':'.$port;
+            }
         }
 
         $result .= $this->getPath($raw);
 
-        if ($this->_query !== NULL)
+        if ($this->query !== null) {
             $result .= '?'.$this->getQuery($raw);
+        }
 
-        if ($this->_fragment !== NULL)
+        if ($this->fragment !== null) {
             $result .= '#'.$this->getFragment($raw);
+        }
 
         return $result;
     }
 
-    /**
-     * Returns the current URI as a string,
-     * in its normalized form.
-     *
-     * \note
-     *      This method is a shortcut for Erebot_URI::toURI(FALSE).
-     */
     public function __toString()
     {
         return $this->toURI();
     }
 
-    /**
-     * Returns the current URI's scheme.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval string
-     *      The current URI's scheme as a string,
-     *      eventually normalized.
-     */
-    public function getScheme($raw = FALSE)
+    public function getScheme($raw = false)
     {
         // 6.2.2.1.  Case Normalization
         // Characters must be normalized to use lowercase letters.
-        if ($raw)
-            return $this->_scheme;
-        return strtolower($this->_scheme);
+        if ($raw) {
+            return $this->scheme;
+        }
+        return strtolower($this->scheme);
     }
 
-    /**
-     * Sets the current URI's scheme.
-     *
-     * \param string $scheme
-     *      New scheme for this URI, as a string.
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $scheme is not valid.
-     */
     public function setScheme($scheme)
     {
         // scheme        = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-        if (!preg_match('/^[-[:alpha:][:alnum:]\\+\\.]*$/Di', $scheme))
+        if (!preg_match('/^[-[:alpha:][:alnum:]\\+\\.]*$/Di', $scheme)) {
             throw new \InvalidArgumentException('Invalid scheme');
-        $this->_scheme = $scheme;
+        }
+        $this->scheme = $scheme;
     }
 
-    /**
-     * Returns the current URI's user information.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval mixed
-     *      The current URI's user information,
-     *      eventually normalized or NULL.
-     */
-    public function getUserInfo($raw = FALSE)
+    public function getUserInfo($raw = false)
     {
-        if ($raw)
-            return $this->_userinfo;
-        return  ($this->_userinfo === NULL)
-                ? NULL
-                : $this->_normalizePercent($this->_userinfo);
+        if ($raw) {
+            return $this->userinfo;
+        }
+        return  ($this->userinfo === null)
+                ? null
+                : $this->normalizePercent($this->userinfo);
     }
 
-    /**
-     * Sets the current URI's user information.
-     *
-     * \param mixed $userinfo
-     *      New user information for this URI
-     *      (either a string or NULL).
-     *
-     * \throw ::InvalidArgumentException
-     *      The given user information is not valid.
-     */
     public function setUserInfo($userinfo)
     {
         /*
@@ -387,43 +335,24 @@ implements  \Erebot\URI\URIInterface
                         '[-[:alnum:]\\._~!\\$&\'\\(\\)\\*\\+,;=:]|'.
                         '%[[:xdigit:]]{2}'.
                     ')*';
-        if ($userinfo !== NULL && !preg_match('/^'.$pattern.'$/Di', $userinfo))
+        if ($userinfo !== null && !preg_match('/^'.$pattern.'$/Di', $userinfo)) {
             throw new \InvalidArgumentException('Invalid user information');
-        $this->_userinfo = $userinfo;
+        }
+        $this->userinfo = $userinfo;
     }
 
-    /**
-     * Returns the current URI's host.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval mixed
-     *      The current URI's host as a string,
-     *      eventually normalized or NULL.
-     */
-    public function getHost($raw = FALSE)
+    public function getHost($raw = false)
     {
         // 6.2.2.1.  Case Normalization
         // Characters must be normalized to use lowercase letters.
-        if ($raw)
-            return $this->_host;
-        return  ($this->_host !== NULL)
-                ? strtolower($this->_normalizePercent($this->_host))
-                : NULL;
+        if ($raw) {
+            return $this->host;
+        }
+        return  ($this->host !== null)
+                ? strtolower($this->normalizePercent($this->host))
+                : null;
     }
 
-    /**
-     * Sets the current URI's host.
-     *
-     * \param string $host
-     *      New host for this URI (either a string or NULL).
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $host is not valid.
-     */
     public function setHost($host)
     {
         /*
@@ -475,68 +404,50 @@ implements  \Erebot\URI\URIInterface
         $regName        =   '(?:[-[:alnum:]\\._~!\\$&\'\\(\\)*\\+,;=]|'.
                             '%[[:xdigit:]]{2})*';
         $pattern        =   '(?:'.$ipLiteral.'|'.$dotAddress.'|'.$regName.')';
-        if ($host !== NULL && !preg_match('/^'.$pattern.'$/Di', $host))
+        if ($host !== null && !preg_match('/^'.$pattern.'$/Di', $host)) {
             throw new \InvalidArgumentException('Invalid host');
-        $this->_host = $host;
+        }
+        $this->host = $host;
     }
 
-    /**
-     * Returns the current URI's port.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval mixed
-     *      When normalization is in effect, the port for
-     *      the current URI will be returned as an integer,
-     *      or NULL.
-     *      When normalization has been disabled, the port
-     *      will be returned as a string or NULL.
-     */
-    public function getPort($raw = FALSE)
+    public function getPort($raw = false)
     {
         // 6.2.3.  Scheme-Based Normalization
-        if ($raw)
-            return $this->_port;
+        if ($raw) {
+            return $this->port;
+        }
 
-        if ($this->_port == '')
-            return NULL;
+        if ($this->port == '') {
+            return null;
+        }
 
-        $port = (int) $this->_port;
+        $port = (int) $this->port;
 
         // Try to canonicalize the port.
-        $tcp = getservbyname($this->_scheme, 'tcp');
-        $udp = getservbyname($this->_scheme, 'udp');
+        $tcp = getservbyname($this->scheme, 'tcp');
+        $udp = getservbyname($this->scheme, 'udp');
 
-        if ($tcp == $port && ($udp === FALSE || $udp == $tcp))
-            return NULL;
+        if ($tcp == $port && ($udp === false || $udp == $tcp)) {
+            return null;
+        }
 
-        if ($udp == $port && ($tcp === FALSE || $udp == $tcp))
-            return NULL;
+        if ($udp == $port && ($tcp === false || $udp == $tcp)) {
+            return null;
+        }
 
         return $port;
     }
 
-    /**
-     * Sets the current URI's port.
-     *
-     * \param mixed $port
-     *      New port for this URI (either a numeric string,
-     *      an integer or NULL).
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $port is not valid.
-     */
     public function setPort($port)
     {
         // port          = *DIGIT
-        if (is_int($port))
+        if (is_int($port)) {
             $port = (string) $port;
-        if ($port !== NULL && strspn($port, '0123456789') != strlen($port))
+        }
+        if ($port !== null && strspn($port, '0123456789') != strlen($port)) {
             throw new \InvalidArgumentException('Invalid port');
-        $this->_port = $port;
+        }
+        $this->port = $port;
     }
 
     /**
@@ -549,56 +460,49 @@ implements  \Erebot\URI\URIInterface
      *      The same $path, with all its dot segments
      *      substituted.
      */
-    protected function _removeDotSegments($path)
+    protected function removeDotSegments($path)
     {
-        if ($path === NULL)
+        if ($path === null) {
             throw new \InvalidArgumentException('Path not set');
+        }
 
         // §5.2.4.  Remove Dot Segments
         $input  = $path;
         $output = '';
 
         while ($input != '') {
-            if (substr($input, 0, 3) == '../')
+            if (substr($input, 0, 3) == '../') {
                 $input = (string) substr($input, 3);
-
-            else if (substr($input, 0, 2) == './')
+            } elseif (substr($input, 0, 2) == './') {
                 $input = (string) substr($input, 2);
-
-            else if (substr($input, 0, 3) == '/./')
+            } elseif (substr($input, 0, 3) == '/./') {
                 $input = substr($input, 2);
-
-            else if ($input == '/.')
+            } elseif ($input == '/.') {
                 $input = '/';
-
-            else if (substr($input, 0, 4) == '/../') {
+            } elseif (substr($input, 0, 4) == '/../') {
                 $input  = (string) substr($input, 3);
                 $pos    = strrpos($output, '/');
-                if ($pos === FALSE)
+                if ($pos === false) {
                     $output = '';
-                else
+                } else {
                     $output = substr($output, 0, $pos);
-            }
-
-            else if ($input == '/..') {
+                }
+            } elseif ($input == '/..') {
                 $input  = '/';
                 $pos    = strrpos($output, '/');
-                if ($pos === FALSE)
+                if ($pos === false) {
                     $output = '';
-                else
+                } else {
                     $output = substr($output, 0, $pos);
-            }
-
-            else if ($input == '.' || $input == '..')
+                }
+            } elseif ($input == '.' || $input == '..') {
                 $input = '';
-
-            else {
+            } else {
                 $pos = strpos($input, '/', 1);
-                if ($pos === FALSE) {
+                if ($pos === false) {
                     $output    .= $input;
                     $input      = '';
-                }
-                else {
+                } else {
                     $output    .= substr($input, 0, $pos);
                     $input      = substr($input, $pos);
                 }
@@ -621,38 +525,29 @@ implements  \Erebot\URI\URIInterface
      *      Despite its name, this method does not modify
      *      the given $path nor the current object.
      */
-    protected function _merge($path)
+    protected function merge($path)
     {
         // 5.2.3.  Merge Paths
-        if ($this->_host !== NULL && $this->_path == '')
+        if ($this->host !== null && $this->path == '') {
             return '/'.$path;
+        }
 
-        $pos = strrpos($this->_path, '/');
-        if ($pos === FALSE)
+        $pos = strrpos($this->path, '/');
+        if ($pos === false) {
             return $path;
-        return substr($this->_path, 0, $pos + 1).$path;
+        }
+        return substr($this->path, 0, $pos + 1).$path;
     }
 
-    /**
-     * Returns the current URI's path.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval string
-     *      The current URI's path as a string,
-     *      eventually normalized.
-     */
-    public function getPath($raw = FALSE)
+    public function getPath($raw = false)
     {
         // 6.2.2.3.  Path Segment Normalization
-        if ($raw)
-            return $this->_path;
+        if ($raw) {
+            return $this->path;
+        }
 
-        return $this->_removeDotSegments(
-            $this->_normalizePercent($this->_path)
+        return $this->removeDotSegments(
+            $this->normalizePercent($this->path)
         );
     }
 
@@ -663,14 +558,14 @@ implements  \Erebot\URI\URIInterface
      *      Path to validate.
      *
      * \param bool $relative
-     *      Whether the given $path is relative (TRUE)
-     *      or not (FAlSE).
+     *      Whether the given $path is relative (\b true)
+     *      or not (\b false).
      *
      * \retval bool
-     *      TRUE if the given $path is valid,
-     *      FALSE otherwise.
+     *      \b true if the given $path is valid,
+     *      \b false otherwise.
      */
-    protected function _validatePath($path, $relative)
+    protected function validatePath($path, $relative)
     {
         /*
         path          = path-abempty    ; begins with "/" or is empty
@@ -712,10 +607,11 @@ implements  \Erebot\URI\URIInterface
         $pathEmpty      = '(?!'.$pchar.')';
 
         $pattern =  $pathAbempty.'|'.$pathAbsolute;
-        if ($relative)
+        if ($relative) {
             $pattern .= '|'.$pathNoscheme;
-        else
+        } else {
             $pattern .= '|'.$pathRootless;
+        }
         $pattern .= '|'.$pathEmpty;
 
         return (bool) preg_match('#^'.$pattern.'$#Di', $path);
@@ -728,67 +624,35 @@ implements  \Erebot\URI\URIInterface
      *      New path for this URI.
      *
      * \param bool $relative
-     *      Whether the given $path is relative (TRUE)
-     *      or not (FALSE).
+     *      Whether the given $path is relative (\b true)
+     *      or not (\b false).
      *
      * \throw ::InvalidArgumentException
      *      The given $path is not valid.
      */
-    protected function _setPath($path, $relative)
+    protected function realSetPath($path, $relative)
     {
-        if (!is_string($path) || !$this->_validatePath($path, $relative))
+        if (!is_string($path) || !$this->validatePath($path, $relative)) {
             throw new InvalidArgumentException(
                 'Invalid path; use relative() for relative paths'
             );
-        $this->_path = $path;
+        }
+        $this->path = $path;
     }
 
-    /**
-     * Sets the current URI's path.
-     *
-     * \param string $path
-     *      New path for this URI.
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $path is not valid.
-     *
-     * \note
-     *      This is a very thin wrapper around the internal
-     *      method Erebot_URI::_setPath().
-     */
     public function setPath($path)
     {
-        $this->_setPath($path, FALSE);
+        $this->realSetPath($path, false);
     }
 
-    /**
-     * Returns the current URI's query.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval mixed
-     *      The current URI's query as a string,
-     *      eventually normalized or NULL.
-     */
-    public function getQuery($raw = FALSE)
+    public function getQuery($raw = false)
     {
-        if ($raw)
-            return $this->_query;
-        return $this->_normalizePercent($this->_query);
+        if ($raw) {
+            return $this->query;
+        }
+        return $this->normalizePercent($this->query);
     }
 
-    /**
-     * Sets the current URI's query.
-     *
-     * \param mixed $query
-     *      New query for this URI (either a string or NULL).
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $query is not valid.
-     */
     public function setQuery($query)
     {
         /*
@@ -803,39 +667,20 @@ implements  \Erebot\URI\URIInterface
                             '[-[:alnum:]\\._~!\\$&\'\\(\\)\\*\\+,;=/\\?]|'.
                             '%[[:xdigit:]]{2}'.
                         ')*';
-        if ($query !== NULL && !preg_match('#^'.$pattern.'$#Di', $query))
+        if ($query !== null && !preg_match('#^'.$pattern.'$#Di', $query)) {
             throw new \InvalidArgumentException('Invalid query');
-        $this->_query = $query;
+        }
+        $this->query = $query;
     }
 
-    /**
-     * Returns the current URI's fragment.
-     *
-     * \param bool $raw
-     *      (optional) Whether the value should be normalized
-     *      before it's returned (FALSE) or not (TRUE).
-     *      The default is to apply normalization.
-     *
-     * \retval mixed
-     *      The current URI's fragment as a string,
-     *      eventually normalized or NULL.
-     */
-    public function getFragment($raw = FALSE)
+    public function getFragment($raw = false)
     {
-        if ($raw)
-            return $this->_fragment;
-        return $this->_normalizePercent($this->_fragment);
+        if ($raw) {
+            return $this->fragment;
+        }
+        return $this->normalizePercent($this->fragment);
     }
 
-    /**
-     * Sets the current URI's fragment.
-     *
-     * \param mixed $fragment
-     *      New fragment for this URI (either a string or NULL).
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $fragment is not valid.
-     */
     public function setFragment($fragment)
     {
         /*
@@ -850,27 +695,12 @@ implements  \Erebot\URI\URIInterface
                             '[-[:alnum:]\\._~!\\$&\'\\(\\)\\*\\+,;=/\\?]|'.
                             '%[[:xdigit:]]{2}'.
                         ')*';
-        if ($fragment !== NULL && !preg_match('#^'.$pattern.'$#Di', $fragment))
+        if ($fragment !== null && !preg_match('#^'.$pattern.'$#Di', $fragment)) {
             throw new \InvalidArgumentException('Invalid fragment');
-        $this->_fragment = $fragment;
+        }
+        $this->fragment = $fragment;
     }
 
-    /**
-     * Returns information about the current URI,
-     * in the same format as parse_url().
-     *
-     * \param $component
-     *      (optional) A specific component to return.
-     *      Read the documentation about parse_url()
-     *      for more information.
-     *
-     * \retval mixed
-     *      Either an array, a string, an integer or NULL,
-     *      depending on $component and the actual contents
-     *      of this URI.
-     *      Read the documentation about parse_url()
-     *      for more information.
-     */
     public function asParsedURL($component = -1)
     {
         if ($component == -1) {
@@ -885,9 +715,8 @@ implements  \Erebot\URI\URIInterface
             );
 
             foreach ($fields as $field => $alias) {
-                $local = '_'.$field;
-                if ($this->$local !== NULL) {
-                    $result[$field] = $this->$local;
+                if ($this->$field !== null) {
+                    $result[$field] = $this->$field;
                     $result[$alias] = $result[$field];
                 }
             }
@@ -897,22 +726,21 @@ implements  \Erebot\URI\URIInterface
                 if (!ctype_digit($result['port'])) {
                     unset($result['port']);
                     unset($result[PHP_URL_PORT]);
-                }
-                else {
+                } else {
                     $result['port']         =
                     $result[PHP_URL_PORT]   = (int) $result['port'];
                 }
             }
 
-            if ($this->_userinfo !== NULL) {
-                $limit = strcspn($this->_userinfo, ':');
+            if ($this->userinfo !== null) {
+                $limit = strcspn($this->userinfo, ':');
                 if ($limit > 0) {
-                    $user = substr($this->_userinfo, 0, $limit);
+                    $user = substr($this->userinfo, 0, $limit);
                     $result['user']         = $user;
                     $result[PHP_URL_USER]   = $user;
                 }
-                $pass = substr($this->_userinfo, $limit + 1);
-                if ($pass !== FALSE) {
+                $pass = substr($this->userinfo, $limit + 1);
+                if ($pass !== false) {
                     $result['pass']         = $pass;
                     $result[PHP_URL_PASS]   = $pass;
                 }
@@ -922,69 +750,49 @@ implements  \Erebot\URI\URIInterface
         }
 
         switch ($component) {
-            case PHP_URL_SCHEME:{
-                return $this->_scheme;
-            }
-            case PHP_URL_HOST:{
-                return $this->_host;
-            }
-            case PHP_URL_PORT:{
-                return  ($this->_port === NULL || !ctype_digit($this->_port))
-                        ? NULL
-                        : (int) $this->_port;
-            }
-            case PHP_URL_PATH:{
-                return $this->_path;
-            }
-            case PHP_URL_QUERY:{
-                return $this->_query;
-            }
-            case PHP_URL_FRAGMENT:{
-                return $this->_fragment;
-            }
-            case PHP_URL_USER:{
-                $user = substr(
-                    $this->_userinfo, 0,
-                    strcspn($this->_userinfo, ':')
-                );
-                return ($user == "" ? NULL : $user);
-            }
-            case PHP_URL_PASS:{
+            case PHP_URL_SCHEME:
+                return $this->scheme;
+
+            case PHP_URL_HOST:
+                return $this->host;
+
+            case PHP_URL_PORT:
+                return  ($this->port === null || !ctype_digit($this->port))
+                        ? null
+                        : (int) $this->port;
+
+            case PHP_URL_PATH:
+                return $this->path;
+
+            case PHP_URL_QUERY:
+                return $this->query;
+
+            case PHP_URL_FRAGMENT:
+                return $this->fragment;
+
+            case PHP_URL_USER:
+                $user = substr($this->userinfo, 0, strcspn($this->userinfo, ':'));
+                return ($user == "" ? null : $user);
+
+            case PHP_URL_PASS:
                 $pass = substr(
-                    $this->_userinfo,
-                    strcspn($this->_userinfo, ':') + 1
+                    $this->userinfo,
+                    strcspn($this->userinfo, ':') + 1
                 );
-                return ($pass === FALSE ? NULL : $pass);
-            }
-            default:{
-                return NULL;
-            }
+                return ($pass === false ? null : $pass);
+
+            default:
+                return null;
         }
     }
 
-    /**
-     * Given a relative reference, returns a new absolute URI
-     * matching that reference.
-     *
-     * \param string $reference
-     *      Some relative reference (can be an absolute
-     *      or relative URI). The current absolute URI
-     *      is used as the base to dereference it.
-     *
-     * \retval Erebot_URI
-     *      A new absolute URI matching the given $reference.
-     *
-     * \throw ::InvalidArgumentException
-     *      The given $reference is not valid.
-     */
     public function relative($reference)
     {
         try {
             $cls    = __CLASS__;
             $result = new $cls($reference);
             return $result;
-        }
-        catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             // Nothing to do. We will try to interpret
             // the reference as a relative URI instead.
         }
@@ -994,7 +802,7 @@ implements  \Erebot\URI\URIInterface
 
         // 5.2.2.  Transform References
         // Our parser is strict.
-        $parsed = $this->_parseURI($reference, TRUE);
+        $parsed = $this->parseURI($reference, true);
 
         // No need to test the case where the scheme is defined.
         // This would be an absolute URI and has already been
@@ -1004,24 +812,24 @@ implements  \Erebot\URI\URIInterface
         $result->setFragment(
             isset($parsed['fragment'])
             ? $parsed['fragment']
-            : NULL
+            : null
         );
 
         // "host" == "authority" here, see the grammar
         // for reasons why this always holds true.
         if (isset($parsed['host'])) {
-            $result->setHost(isset($parsed['host']) ? $parsed['host'] : NULL);
-            $result->setPort(isset($parsed['port']) ? $parsed['port'] : NULL);
+            $result->setHost(isset($parsed['host']) ? $parsed['host'] : null);
+            $result->setPort(isset($parsed['port']) ? $parsed['port'] : null);
             $result->setUserInfo(
                 isset($parsed['userinfo'])
                 ? $parsed['userinfo']
-                : NULL
+                : null
             );
-            $result->_setPath($parsed['path'], TRUE);
+            $result->realSetPath($parsed['path'], true);
             $result->setQuery(
                 isset($parsed['query'])
                 ? $parsed['query']
-                : NULL
+                : null
             );
             return $result;
         }
@@ -1030,84 +838,81 @@ implements  \Erebot\URI\URIInterface
         // $result is already a copy of the base.
 
         if ($parsed['path'] == '') {
-            if (isset($parsed['query']))
+            if (isset($parsed['query'])) {
                 $result->setQuery($parsed['query']);
+            }
             return $result;
         }
 
-        if (substr($parsed['path'], 0, 1) == '/')
-            $result->_setPath(
-                $result->_removeDotSegments($parsed['path']),
-                TRUE
+        if (substr($parsed['path'], 0, 1) == '/') {
+            $result->realSetPath(
+                $result->removeDotSegments($parsed['path']),
+                true
             );
-        else
-            $result->_setPath(
-                $result->_removeDotSegments($result->_merge($parsed['path'])),
-                TRUE
+        } else {
+            $result->realSetPath(
+                $result->removeDotSegments($result->merge($parsed['path'])),
+                true
             );
-        $result->setQuery(isset($parsed['query']) ? $parsed['query'] : NULL);
+        }
+        $result->setQuery(isset($parsed['query']) ? $parsed['query'] : null);
         return $result;
     }
 
-    public static function fromAbsPath($abspath, $strict = TRUE)
+    public static function fromAbsPath($abspath, $strict = true)
     {
         if (!strncasecmp(PHP_OS, "Win", 3)) {
             $isUnc = (substr($abspath, 0, 2) == '\\\\');
-            if ($isUnc)
+            if ($isUnc) {
                 $abspath = ltrim($abspath, '\\');
+            }
             $parts = explode('\\', $abspath);
 
-            // This is actually UNCW -- "Long UNC".
             if ($isUnc && $parts[0] == '?') {
+                // This is actually UNCW -- "Long UNC".
                 array_shift($parts);
-                if (strpos($parts[0], ':') !== FALSE) {
+                if (strpos($parts[0], ':') !== false) {
                     $host = 'localhost';
                     $path = implode('\\', $parts);
-                }
-                else if ($parts[0] != 'UNC')
+                } elseif ($parts[0] != 'UNC') {
                     throw new \InvalidArgumentException('Invalid UNC path');
-                else {
+                } else {
                     array_shift($parts[0]);         // shift the "UNC" token.
                     $host = array_shift($parts[0]); // shift ServerName.
                     $path = implode('\\', $parts);
                 }
-            }
-
-            // Regular UNC path.
-            else if ($isUnc) {
+            } elseif ($isUnc) {
+                // Regular UNC path.
                 $host = array_shift($parts[0]); // shift ServerName.
                 $path = implode('\\', $parts);
-            }
-
-            // Regular local path.
-            else {
+            } else {
+                // Regular local path.
                 $host = 'localhost';
                 $path = implode('\\', $parts);
             }
 
-            if (!$strict)
+            if (!$strict) {
                 $path = str_replace('/', '\\', $path);
+            }
             $path = str_replace('/', '%2F', $path);
             $path = str_replace('\\', '/', $path);
             $path = ltrim($path, '/');
-        }
-
-        else {
+        } else {
             $host = 'localhost';
 
             if (DIRECTORY_SEPARATOR != '/') {
-                if (!$strict)
+                if (!$strict) {
                     $abspath = str_replace('/', DIRECTORY_SEPARATOR, $abspath);
+                }
                 $path = str_replace('/', '%2F', $path);
                 $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
             }
             $path = ltrim($abspath, '/');
         }
 
-        $host = strtolower(self::_normalizePercent($host));
+        $host = strtolower(self::normalizePercent($host));
         $cls = __CLASS__;
         $url = 'file://' . ($host == 'localhost' ? '' : $host) . '/' . $path;
         return new $cls($url);
     }
 }
-
