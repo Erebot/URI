@@ -72,11 +72,11 @@ extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider    normalResults
-     * @covers          \Erebot\URI\URI::relative
+     * @covers          \Erebot\URI::relative
      */
     public function testNormalResolution($reference, $targetURI)
     {
-        $base   = new \Erebot\URI\URI("http://a/b/c/d;p?q");
+        $base   = new \Erebot\URI("http://a/b/c/d;p?q");
         $target = $base->relative($reference);
         $this->assertEquals($targetURI, (string) $target, $reference);
     }

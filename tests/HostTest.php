@@ -36,12 +36,12 @@ extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider    validProvider
-     * @covers          \Erebot\URI\URI
+     * @covers          \Erebot\URI
      */
     public function testNoPort($host)
     {
         try {
-            $uri = new \Erebot\URI\URI('http://'.$host.'/');
+            $uri = new \Erebot\URI('http://'.$host.'/');
         }
         catch (Erebot_InvalidValueException $e) {
             $this->fail("'".$host."' and no port: ".$e->getMessage());
@@ -50,12 +50,12 @@ extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider    validProvider
-     * @covers          \Erebot\URI\URI
+     * @covers          \Erebot\URI
      */
     public function testWithPort($host)
     {
         try {
-            $uri = new \Erebot\URI\URI('http://'.$host.':42/');
+            $uri = new \Erebot\URI('http://'.$host.':42/');
         }
         catch (Erebot_InvalidValueException $e) {
             $this->fail("'".$host."' and a port: ".$e->getMessage());
