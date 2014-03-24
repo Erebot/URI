@@ -20,11 +20,11 @@ class   MainTest
 extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers \Erebot\URI\Main
+     * @covers \Erebot\URI\URI
      */
     public function testParsing()
     {
-        $base   = new \Erebot\URI\Main("http://u:p@a:8080/b/c/d;p?q#r");
+        $base   = new \Erebot\URI\URI("http://u:p@a:8080/b/c/d;p?q#r");
         $this->assertEquals("http",     $base->getScheme());
         $this->assertEquals("u:p",      $base->getUserInfo());
         $this->assertEquals("a",        $base->getHost());
@@ -35,17 +35,17 @@ extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Erebot\URI\Main::__toString
+     * @covers \Erebot\URI\URI::__toString
      */
     public function testToString()
     {
         $original   = "http://u:p@a:8080/b/c/d;p?q#r";
-        $base       = new \Erebot\URI\Main($original);
+        $base       = new \Erebot\URI\URI($original);
         $this->assertEquals($original, (string) $base);
     }
 
     /**
-     * @covers \Erebot\URI\Main
+     * @covers \Erebot\URI\URI
      */
     public function testCaseNormalization()
     {
@@ -53,7 +53,7 @@ extends PHPUnit_Framework_TestCase
         // The dot segments must be handled correctly.
         $original   = "bAr://LOCALHOST/../a/b/./c/../d";
         $normed     = "bar://localhost/a/b/d";
-        $uri        = new \Erebot\URI\Main($original);
+        $uri        = new \Erebot\URI\URI($original);
         $this->assertEquals($original, $uri->toURI(TRUE));
         $this->assertEquals($normed, $uri->toURI(FALSE));
         $this->assertEquals($normed, $uri->toURI());
@@ -61,7 +61,7 @@ extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Erebot\URI\Main
+     * @covers \Erebot\URI\URI
      */
     public function testPercentEncodingNormalisation()
     {
@@ -69,7 +69,7 @@ extends PHPUnit_Framework_TestCase
         // must be UPPERCASED.
         // Percent-encoded characters belonging to the "unreserved" set
         // must be replaced by their actual representation.
-        $uri = new \Erebot\URI\Main(
+        $uri = new \Erebot\URI\URI(
             "http://%41%20%3a%62:%63%40%64@".
             "loc%61l%2dhost.example%2ecom/".
             "%7e%2e%2f/foobar"

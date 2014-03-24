@@ -43,7 +43,7 @@ namespace Erebot\URI;
  * behaviour by passing $raw=true to said getters.
  * Normalization is done using the rules defined in RFC 3986.
  */
-class Main implements \Erebot\URI\URIInterface
+class URI implements \Erebot\URI\URIInterface
 {
     /// Scheme component (sometimes also erroneously called a "protocol").
     protected $scheme;

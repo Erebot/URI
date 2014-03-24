@@ -31,11 +31,11 @@ extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider    userinfoProvider
-     * @covers          \Erebot\URI\Main::asParsedURL
+     * @covers          \Erebot\URI\URI::asParsedURL
      */
     public function testParseURLCompatibilityQuirks($userinfo, $user, $pass)
     {
-        $uri = new \Erebot\URI\Main("http://".$userinfo."@localhost/");
+        $uri = new \Erebot\URI\URI("http://".$userinfo."@localhost/");
 
         // Try requesting those specific components first.
         if ($user !== NULL)
