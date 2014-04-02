@@ -33,7 +33,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the raw contents of the components
      *      should be used (\b true) or a normalized alternative (\b false).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \param bool $credentials
      *      (optional) Whether the content of the "user information"
@@ -61,7 +61,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval string
      *      The current URI's scheme as a string,
@@ -86,7 +86,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval mixed
      *      The current URI's user information,
@@ -112,7 +112,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval mixed
      *      The current URI's host as a string,
@@ -137,7 +137,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval mixed
      *      When normalization is in effect, the port for
@@ -166,7 +166,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval string
      *      The current URI's path as a string,
@@ -195,7 +195,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval mixed
      *      The current URI's query as a string,
@@ -220,7 +220,7 @@ interface URIInterface
      * \param bool $raw
      *      (optional) Whether the value should be normalized
      *      before it's returned (\b false) or not (\b true).
-     *      The default is to apply normalization.
+     *      The default is to not apply normalization.
      *
      * \retval mixed
      *      The current URI's fragment as a string,
