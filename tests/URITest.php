@@ -79,4 +79,47 @@ extends PHPUnit_Framework_TestCase
             (string) $uri
         );
     }
+
+    public function validPathProvider()
+    {
+        return array(
+            array("/a/b/c"),
+            array(""),
+            array("/"),
+            array("@a/b")
+        );
+    }
+
+    /**
+     * @dataProvider    validPathProvider
+     * @covers          \Erebot\URI::setPath
+     */
+    public function testSetPathWithValidPath($path)
+    {
+        $uri = new \Erebot\URI("http://localhost");
+        $uri->setPath($path);
+
+        $this->assertEquals($uri->getPath(), $path);
+    }
+
+    public function invalidPathProvider()
+    {
+        return array(
+            array("?/"),
+            array("#/"),
+            array(FALSE)
+        );
+    }
+
+    /**
+     * @dataProvider    invalidPathProvider
+     * @covers          \Erebot\URI::setPath
+     */
+    public function testSetPathWithInvalidPath($path)
+    {
+        $this->setExpectedException('\InvalidArgumentException');
+
+        $uri = new \Erebot\URI("http://localhost");
+        $uri->setPath($path);
+    }
 }
