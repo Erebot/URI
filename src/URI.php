@@ -606,13 +606,13 @@ class URI implements \Erebot\URIInterface
         $pathRootless   = $segmentNz.'(?:/'.$segment.')*';
         $pathEmpty      = '(?!'.$pchar.')';
 
-        $pattern =  $pathAbempty.'|'.$pathAbsolute;
+        $pattern = '(?:' . $pathAbempty.'|'.$pathAbsolute;
         if ($relative) {
             $pattern .= '|'.$pathNoscheme;
         } else {
             $pattern .= '|'.$pathRootless;
         }
-        $pattern .= '|'.$pathEmpty;
+        $pattern .= '|'.$pathEmpty . ')';
 
         return (bool) preg_match('#^'.$pattern.'$#Di', $path);
     }
@@ -633,7 +633,7 @@ class URI implements \Erebot\URIInterface
     protected function realSetPath($path, $relative)
     {
         if (!is_string($path) || !$this->validatePath($path, $relative)) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 'Invalid path; use relative() for relative paths'
             );
         }
