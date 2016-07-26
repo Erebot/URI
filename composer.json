@@ -13,9 +13,7 @@
         }
     ],
     "support": {
-        "email": "erebot@erebot.net",
         "issues": "https://github.com/Erebot/URI/issues",
-        "wiki": "http://erebot.github.io/Erebot/",
         "irc": "irc://irc.iiens.net/Erebot",
         "source": "https://github.com/Erebot/URI"
     },
