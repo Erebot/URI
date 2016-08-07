@@ -60,7 +60,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval string
@@ -85,7 +85,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
@@ -111,7 +111,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
@@ -136,7 +136,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
@@ -165,7 +165,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval string
@@ -194,7 +194,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
@@ -219,7 +219,7 @@ interface URIInterface
      *
      * \param bool $raw
      *      (optional) Whether the value should be normalized
-     *      before it's returned (\b false) or not (\b true).
+     *      prior to being returned (\b false) or not (\b true).
      *      The default is to apply normalization.
      *
      * \retval mixed
@@ -254,6 +254,12 @@ interface URIInterface
      *      of this URI.
      *      Read the documentation about parse_url()
      *      for more information.
+     *
+     * \note
+     *      The behaviour of this method matches that of parse_url()
+     *      as defined in PHP 5.5.19+, PHP 5.6.3+ and PHP 7.0.0+.
+     *      In particular, an empty username/password is returned
+     *      as such, rather than as a null value.
      */
     public function asParsedURL($component = -1);
 
