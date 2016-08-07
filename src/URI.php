@@ -34,9 +34,12 @@ namespace Erebot;
  *
  * This implementation doesn't assume that the "userinfo" part
  * is made up of a "username:password" pair (in contrast to
- * parse_url() which is based on RFC 1738), and provides a single
- * field named "userinfo" instead. Such pairs will be merged upon
- * encounter.
+ * parse_url() which is initially based on RFC 1738), and provides
+ * a single field named "userinfo" instead.
+ * Such pairs will be merged upon encounter.
+ *
+ * This implementation is also compatible with RFC 6874
+ * which adds support for IPv6 zone identifiers.
  *
  * All components are normalized by default when retrieved using
  * any of the getters except asParsedURL(). You may override this
@@ -64,13 +67,15 @@ class URI implements \Erebot\URIInterface
      * Constructs an URI.
      *
      * \param mixed $uri
-     *      Either a string representing the URI or an array
-     *      as returned by PHP's parse_url() function.
+     *      (optional) Either a string representing the URI
+     *      or an array as returned by PHP's parse_url() function.
+     *      Defaults to an empty URI (which must be populated
+     *      afterwards using the setters from this API) if omitted.
      *
      * \throw ::InvalidArgumentException
      *      The given URI is invalid.
      */
-    public function __construct($uri)
+    public function __construct($uri = array())
     {
         if (is_string($uri)) {
             $uri = $this->parseURI($uri, false);
@@ -357,7 +362,7 @@ class URI implements \Erebot\URIInterface
     {
         /*
         host          = IP-literal / IPv4address / reg-name
-        IP-literal    = "[" ( IPv6address / IPvFuture  ) "]"
+        IP-literal    = "[" ( IPv6address / IPv6addrz / IPvFuture  ) "]"
         IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
         IPv6address   =                            6( h16 ":" ) ls32
                       /                       "::" 5( h16 ":" ) ls32
@@ -381,29 +386,35 @@ class URI implements \Erebot\URIInterface
         unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
         sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
                       / "*" / "+" / "," / ";" / "="
+        ZoneID        = 1*( unreserved / pct-encoded )
+        IPv6addrz     = IPv6address "%25" ZoneID
         */
         $decOctet       = '(?:\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])';
-        $dotAddress     = $decOctet.'(?:\\.'.$decOctet.'){3}';
-        $half           = '[[:xdigit:]]{1,4}';
-        $long           = '(?:'.$half.':'.$half.'|'.$dotAddress.')';
-        $colonAddress   =
+        $ipv4Address    = $decOctet.'(?:\\.'.$decOctet.'){3}';
+        $h16            = '[[:xdigit:]]{1,4}';
+        $ls32           = '(?:'.$h16.':'.$h16.'|'.$ipv4Address.')';
+        $ipv6Address   =
             '(?:'.
-            '(?:'.$half.':){6}'.$long.'|'.
-            '::(?:'.$half.':){5}'.$long.'|'.
-            '(?:'.$half.')?::(?:'.$half.':){4}'.$long.'|'.
-            '(?:(?:'.$half.':)?'.$half.')?::(?:'.$half.':){3}'.$long.'|'.
-            '(?:(?:'.$half.':){0,2}'.$half.')?::(?:'.$half.':){2}'.$long.'|'.
-            '(?:(?:'.$half.':){0,3}'.$half.')?::'.$half.':'.$long.'|'.
-            '(?:(?:'.$half.':){0,4}'.$half.')?::'.$long.'|'.
-            '(?:(?:'.$half.':){0,5}'.$half.')?::'.$half.'|'.
-            '(?:(?:'.$half.':){0,6}'.$half.')?::'.
+            '(?:'.$h16.':){6}'.$ls32.'|'.
+            '::(?:'.$h16.':){5}'.$ls32.'|'.
+            '(?:'.$h16.')?::(?:'.$h16.':){4}'.$ls32.'|'.
+            '(?:(?:'.$h16.':)?'.$h16.')?::(?:'.$h16.':){3}'.$ls32.'|'.
+            '(?:(?:'.$h16.':){0,2}'.$h16.')?::(?:'.$h16.':){2}'.$ls32.'|'.
+            '(?:(?:'.$h16.':){0,3}'.$h16.')?::'.$h16.':'.$ls32.'|'.
+            '(?:(?:'.$h16.':){0,4}'.$h16.')?::'.$ls32.'|'.
+            '(?:(?:'.$h16.':){0,5}'.$h16.')?::'.$h16.'|'.
+            '(?:(?:'.$h16.':){0,6}'.$h16.')?::'.
             ')';
         $ipFuture       =   'v[[:xdigit:]]+\\.'.
                             '[-[:alnum:]\\._~!\\$&\'\\(\\)*\\+,;=]+';
-        $ipLiteral      =   '\\[(?:'.$colonAddress.'|'.$ipFuture.')\\]';
-        $regName        =   '(?:[-[:alnum:]\\._~!\\$&\'\\(\\)*\\+,;=]|'.
-                            '%[[:xdigit:]]{2})*';
-        $pattern        =   '(?:'.$ipLiteral.'|'.$dotAddress.'|'.$regName.')';
+        $unreserved     =   '-[:alnum:]\\._~';
+        $subDelims      =   '!\\$&\'\\(\\)*\\+,;=';
+        $pctEncoded     =   '%[[:xdigit:]]{2}';
+        $zoneID         =   "(?:[$unreserved]|$pctEncoded)+";
+        $ipv6Addrz      =   "$ipv6Address%25$zoneID";
+        $regName        =   "(?:[$unreserved$subDelims]|$pctEncoded)*";
+        $ipLiteral      =   '\\[(?:'.$ipv6Addrz.'|'.$ipv6Address.'|'.$ipFuture.')\\]';
+        $pattern        =   '(?:'.$ipLiteral.'|'.$ipv4Address.'|'.$regName.')';
         if ($host !== null && !preg_match('/^'.$pattern.'$/Di', $host)) {
             throw new \InvalidArgumentException('Invalid host');
         }
@@ -480,7 +491,7 @@ class URI implements \Erebot\URIInterface
             } elseif ($input == '/.') {
                 $input = '/';
             } elseif (substr($input, 0, 4) == '/../') {
-                $input  = (string) substr($input, 3);
+                $input  = substr($input, 3);
                 $pos    = strrpos($output, '/');
                 if ($pos === false) {
                     $output = '';
@@ -703,83 +714,67 @@ class URI implements \Erebot\URIInterface
 
     public function asParsedURL($component = -1)
     {
-        if ($component == -1) {
-            $result = array();
-            $fields = array(
-                'scheme'    => PHP_URL_SCHEME,
-                'host'      => PHP_URL_HOST,
-                'port'      => PHP_URL_PORT,
-                'path'      => PHP_URL_PATH,
-                'query'     => PHP_URL_QUERY,
-                'fragment'  => PHP_URL_FRAGMENT,
-            );
+        $result = array();
 
-            foreach ($fields as $field => $alias) {
-                if ($this->$field !== null) {
-                    $result[$field] = $this->$field;
-                    $result[$alias] = $result[$field];
-                }
+        // Copy some of the fields now and the rest later.
+        // This is done in two passes so that the order of the fields
+        // in the result matches exactly the output of parse_url().
+        foreach (array('scheme', 'host', 'port') as $field) {
+            if ($this->$field !== null) {
+                $result[$field] = $this->$field;
             }
-
-            // Cleanup "port" component.
-            if (isset($result['port'])) {
-                if (strspn($result['port'], '0123456789') != strlen($result['port'])) {
-                    unset($result['port']);
-                    unset($result[PHP_URL_PORT]);
-                } else {
-                    $result['port']         =
-                    $result[PHP_URL_PORT]   = (int) $result['port'];
-                }
-            }
-
-            if ($this->userinfo !== null) {
-                $limit = strcspn($this->userinfo, ':');
-                if ($limit > 0) {
-                    $user = substr($this->userinfo, 0, $limit);
-                    $result['user']         = $user;
-                    $result[PHP_URL_USER]   = $user;
-                }
-                $pass = substr($this->userinfo, $limit + 1);
-                if ($pass !== false) {
-                    $result['pass']         = $pass;
-                    $result[PHP_URL_PASS]   = $pass;
-                }
-            }
-
-            return $result;
         }
 
+        // Cleanup "port" component.
+        if (isset($result['port'])) {
+            if (strspn($result['port'], '0123456789') != strlen($result['port'])) {
+                unset($result['port']);
+            } else {
+                $result['port'] = (int) $result['port'];
+            }
+        }
+
+        if ($this->userinfo !== null) {
+            $pos = strpos($this->userinfo, ':');
+            if ($pos !== false) {
+                $result['user'] = (string) substr($this->userinfo, 0, $pos);
+                $result['pass'] = (string) substr($this->userinfo, $pos + 1);
+            } else {
+                $result['user'] = $this->userinfo;
+            }
+        }
+
+        // We loop on the rest of the fields now.
+        // See the previous loop for an explanation.
+        foreach (array('path', 'query', 'fragment') as $field) {
+            if ($this->$field !== null) {
+                $result[$field] = $this->$field;
+            }
+        }
+
+        // Detect invalid URIs.
+        if (!isset($result['host']) || $result['host'] === '' ||
+            !isset($result['scheme']) || $result['scheme'] === '') {
+            return false;
+        }
+
+        // The positions match the values of PHP_URL_SCHEME, PHP_URL_HOST, etc.
+        $fields = array('scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment');
         switch ($component) {
+            case -1:
+                return $result;
+
             case PHP_URL_SCHEME:
-                return $this->scheme;
-
             case PHP_URL_HOST:
-                return $this->host;
-
             case PHP_URL_PORT:
-                return  ($this->port === null || strspn($this->port, '0123456789') != strlen($this->port))
-                        ? null
-                        : (int) $this->port;
-
-            case PHP_URL_PATH:
-                return $this->path;
-
-            case PHP_URL_QUERY:
-                return $this->query;
-
-            case PHP_URL_FRAGMENT:
-                return $this->fragment;
-
             case PHP_URL_USER:
-                $user = substr($this->userinfo, 0, strcspn($this->userinfo, ':'));
-                return ($user == "" ? null : $user);
-
             case PHP_URL_PASS:
-                $pass = substr(
-                    $this->userinfo,
-                    strcspn($this->userinfo, ':') + 1
-                );
-                return ($pass === false ? null : $pass);
+            case PHP_URL_PATH:
+            case PHP_URL_QUERY:
+            case PHP_URL_FRAGMENT:
+                return isset($result[$fields[$component]])
+                    ? $result[$fields[$component]]
+                    :null;
 
             default:
                 return null;
