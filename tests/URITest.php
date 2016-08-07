@@ -122,4 +122,23 @@ extends PHPUnit_Framework_TestCase
         $uri = new \Erebot\URI("http://localhost");
         $uri->setPath($path);
     }
+
+    public function invalidHostProvider()
+    {
+        return array(
+            array("http://@:"),
+            array("http://:"),
+        );
+    }
+
+    /**
+     * @dataProvider    invalidHostProvider
+     * @covers          \Erebot\URI::setHost
+     */
+    public function testSetHostWithInvalidHost($url)
+    {
+        $this->setExpectedException('\InvalidArgumentException');
+        $uri = new \Erebot\URI($url);
+    }
+
 }
