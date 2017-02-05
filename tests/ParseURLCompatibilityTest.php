@@ -125,12 +125,12 @@ extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider    noSchemeProvider
-     * @covers          \Erebot\URI::asParsedURL
+     * @dataProvider        noSchemeProvider
+     * @covers              \Erebot\URI::asParsedURL
+     * @expectedException   \InvalidArgumentException
      */
     public function testParseURLWithoutSchemes($url)
     {
-        $this->setExpectedException('\InvalidArgumentException');
         $uri = new \Erebot\URI($url);
         $uri->asParsedURL();
     }
