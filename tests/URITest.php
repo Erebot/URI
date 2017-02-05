@@ -116,13 +116,12 @@ extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider    invalidPathProvider
-     * @covers          \Erebot\URI::setPath
+     * @dataProvider        invalidPathProvider
+     * @covers              \Erebot\URI::setPath
+     * @expectedException   \InvalidArgumentException
      */
     public function testSetPathWithInvalidPath($path)
     {
-        $this->setExpectedException('\InvalidArgumentException');
-
         $uri = new \Erebot\URI("http://localhost");
         $uri->setPath($path);
     }
@@ -136,12 +135,12 @@ extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider    invalidHostProvider
-     * @covers          \Erebot\URI::setHost
+     * @dataProvider        invalidHostProvider
+     * @covers              \Erebot\URI::setHost
+     * @expectedException   \InvalidArgumentException
      */
     public function testSetHostWithInvalidHost($url)
     {
-        $this->setExpectedException('\InvalidArgumentException');
         $uri = new \Erebot\URI($url);
     }
 
